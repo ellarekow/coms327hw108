@@ -3,13 +3,16 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <vector>
+#include <string.h>
 
 #include "io.h"
 #include "character.h"
 #include "poke327.h"
 #include "pokemon.h"
 
-typedef struct io_message {
+typedef struct io_message
+{
   /* Will print " --more-- " at end of line when another message follows. *
    * Leave 10 extra spaces for that.                                      */
   char msg[71];
@@ -39,7 +42,8 @@ void io_reset_terminal(void)
 {
   endwin();
 
-  while (io_head) {
+  while (io_head)
+  {
     io_tail = io_head;
     io_head = io_head->next;
     free(io_tail);
@@ -52,7 +56,8 @@ void io_queue_message(const char *format, ...)
   io_message_t *tmp;
   va_list ap;
 
-  if (!(tmp = (io_message_t *) malloc(sizeof (*tmp)))) {
+  if (!(tmp = (io_message_t *)malloc(sizeof(*tmp))))
+  {
     perror("malloc");
     exit(1);
   }
@@ -61,13 +66,16 @@ void io_queue_message(const char *format, ...)
 
   va_start(ap, format);
 
-  vsnprintf(tmp->msg, sizeof (tmp->msg), format, ap);
+  vsnprintf(tmp->msg, sizeof(tmp->msg), format, ap);
 
   va_end(ap);
 
-  if (!io_head) {
+  if (!io_head)
+  {
     io_head = io_tail = tmp;
-  } else {
+  }
+  else
+  {
     io_tail->next = tmp;
     io_tail = tmp;
   }
@@ -75,13 +83,15 @@ void io_queue_message(const char *format, ...)
 
 static void io_print_message_queue(uint32_t y, uint32_t x)
 {
-  while (io_head) {
+  while (io_head)
+  {
     io_tail = io_head;
     attron(COLOR_PAIR(COLOR_CYAN));
     mvprintw(y, x, "%-80s", io_head->msg);
     attroff(COLOR_PAIR(COLOR_CYAN));
     io_head = io_head->next;
-    if (io_head) {
+    if (io_head)
+    {
       attron(COLOR_PAIR(COLOR_CYAN));
       mvprintw(y, x + 70, "%10s", " --more-- ");
       attroff(COLOR_PAIR(COLOR_CYAN));
@@ -103,8 +113,8 @@ static void io_print_message_queue(uint32_t y, uint32_t x)
  **************************************************************************/
 static int compare_trainer_distance(const void *v1, const void *v2)
 {
-  const Character *const *c1 = (const Character *const *) v1;
-  const Character *const *c2 = (const Character *const *) v2;
+  const Character *const *c1 = (const Character *const *)v1;
+  const Character *const *c2 = (const Character *const *)v2;
 
   return (world.rival_dist[(*c1)->pos[dim_y]][(*c1)->pos[dim_x]] -
           world.rival_dist[(*c2)->pos[dim_y]][(*c2)->pos[dim_x]]);
@@ -115,20 +125,23 @@ static Character *io_nearest_visible_trainer()
   Character **c, *n;
   uint32_t x, y, count;
 
-  c = (Character **) malloc(world.cur_map->num_trainers * sizeof (*c));
+  c = (Character **)malloc(world.cur_map->num_trainers * sizeof(*c));
 
   /* Get a linear list of trainers */
-  for (count = 0, y = 1; y < MAP_Y - 1; y++) {
-    for (x = 1; x < MAP_X - 1; x++) {
+  for (count = 0, y = 1; y < MAP_Y - 1; y++)
+  {
+    for (x = 1; x < MAP_X - 1; x++)
+    {
       if (world.cur_map->cmap[y][x] && world.cur_map->cmap[y][x] !=
-          &world.pc) {
+                                           &world.pc)
+      {
         c[count++] = world.cur_map->cmap[y][x];
       }
     }
   }
 
   /* Sort it by distance from PC */
-  qsort(c, count, sizeof (*c), compare_trainer_distance);
+  qsort(c, count, sizeof(*c), compare_trainer_distance);
 
   n = c[0];
 
@@ -143,12 +156,18 @@ void io_display()
   Character *c;
 
   clear();
-  for (y = 0; y < MAP_Y; y++) {
-    for (x = 0; x < MAP_X; x++) {
-      if (world.cur_map->cmap[y][x]) {
+  for (y = 0; y < MAP_Y; y++)
+  {
+    for (x = 0; x < MAP_X; x++)
+    {
+      if (world.cur_map->cmap[y][x])
+      {
         mvaddch(y + 1, x, world.cur_map->cmap[y][x]->symbol);
-      } else {
-        switch (world.cur_map->map[y][x]) {
+      }
+      else
+      {
+        switch (world.cur_map->map[y][x])
+        {
         case ter_boulder:
         case ter_mountain:
           attron(COLOR_PAIR(COLOR_MAGENTA));
@@ -188,12 +207,12 @@ void io_display()
           attroff(COLOR_PAIR(COLOR_GREEN));
           break;
         default:
- /* Use zero as an error symbol, since it stands out somewhat, and it's *
-  * not otherwise used.                                                 */
+          /* Use zero as an error symbol, since it stands out somewhat, and it's *
+           * not otherwise used.                                                 */
           attron(COLOR_PAIR(COLOR_CYAN));
           mvaddch(y + 1, x, '0');
-          attroff(COLOR_PAIR(COLOR_CYAN)); 
-       }
+          attroff(COLOR_PAIR(COLOR_CYAN));
+        }
       }
     }
   }
@@ -208,18 +227,19 @@ void io_display()
   mvprintw(22, 1, "%d known %s.", world.cur_map->num_trainers,
            world.cur_map->num_trainers > 1 ? "trainers" : "trainer");
   mvprintw(22, 30, "Nearest visible trainer: ");
-  if ((c = io_nearest_visible_trainer())) {
+  if ((c = io_nearest_visible_trainer()))
+  {
     attron(COLOR_PAIR(COLOR_RED));
     mvprintw(22, 55, "%c at %d %c by %d %c.",
              c->symbol,
              abs(c->pos[dim_y] - world.pc.pos[dim_y]),
-             ((c->pos[dim_y] - world.pc.pos[dim_y]) <= 0 ?
-              'N' : 'S'),
+             ((c->pos[dim_y] - world.pc.pos[dim_y]) <= 0 ? 'N' : 'S'),
              abs(c->pos[dim_x] - world.pc.pos[dim_x]),
-             ((c->pos[dim_x] - world.pc.pos[dim_x]) <= 0 ?
-              'W' : 'E'));
+             ((c->pos[dim_x] - world.pc.pos[dim_x]) <= 0 ? 'W' : 'E'));
     attroff(COLOR_PAIR(COLOR_RED));
-  } else {
+  }
+  else
+  {
     attron(COLOR_PAIR(COLOR_BLUE));
     mvprintw(22, 55, "NONE.");
     attroff(COLOR_PAIR(COLOR_BLUE));
@@ -234,10 +254,11 @@ uint32_t io_teleport_pc(pair_t dest)
 {
   /* Just for fun. And debugging.  Mostly debugging. */
 
-  do {
+  do
+  {
     dest[dim_x] = rand_range(1, MAP_X - 2);
     dest[dim_y] = rand_range(1, MAP_Y - 2);
-  } while (world.cur_map->cmap[dest[dim_y]][dest[dim_x]]                  ||
+  } while (world.cur_map->cmap[dest[dim_y]][dest[dim_x]] ||
            move_cost[char_pc][world.cur_map->map[dest[dim_y]]
                                                 [dest[dim_x]]] == INT_MAX ||
            world.rival_dist[dest[dim_y]][dest[dim_x]] < 0);
@@ -252,25 +273,29 @@ static void io_scroll_trainer_list(char (*s)[40], uint32_t count)
 
   offset = 0;
 
-  while (1) {
-    for (i = 0; i < 13; i++) {
+  while (1)
+  {
+    for (i = 0; i < 13; i++)
+    {
       mvprintw(i + 6, 19, " %-40s ", s[i + offset]);
     }
-    switch (getch()) {
+    switch (getch())
+    {
     case KEY_UP:
-      if (offset) {
+      if (offset)
+      {
         offset--;
       }
       break;
     case KEY_DOWN:
-      if (offset < (count - 13)) {
+      if (offset < (count - 13))
+      {
         offset++;
       }
       break;
     case 27:
       return;
     }
-
   }
 }
 
@@ -278,9 +303,9 @@ static void io_list_trainers_display(Npc **c,
                                      uint32_t count)
 {
   uint32_t i;
-  char (*s)[40]; /* pointer to array of 40 char */
+  char(*s)[40]; /* pointer to array of 40 char */
 
-  s = (char (*)[40]) malloc(count * sizeof (*s));
+  s = (char(*)[40])malloc(count * sizeof(*s));
 
   mvprintw(3, 19, " %-40s ", "");
   /* Borrow the first element of our array for this string: */
@@ -288,29 +313,32 @@ static void io_list_trainers_display(Npc **c,
   mvprintw(4, 19, " %-40s ", s[0]);
   mvprintw(5, 19, " %-40s ", "");
 
-  for (i = 0; i < count; i++) {
+  for (i = 0; i < count; i++)
+  {
     snprintf(s[i], 40, "%16s %c: %2d %s by %2d %s",
              char_type_name[c[i]->ctype],
              c[i]->symbol,
              abs(c[i]->pos[dim_y] - world.pc.pos[dim_y]),
-             ((c[i]->pos[dim_y] - world.pc.pos[dim_y]) <= 0 ?
-              "North" : "South"),
+             ((c[i]->pos[dim_y] - world.pc.pos[dim_y]) <= 0 ? "North" : "South"),
              abs(c[i]->pos[dim_x] - world.pc.pos[dim_x]),
-             ((c[i]->pos[dim_x] - world.pc.pos[dim_x]) <= 0 ?
-              "West" : "East"));
-    if (count <= 13) {
+             ((c[i]->pos[dim_x] - world.pc.pos[dim_x]) <= 0 ? "West" : "East"));
+    if (count <= 13)
+    {
       /* Handle the non-scrolling case right here. *
        * Scrolling in another function.            */
       mvprintw(i + 6, 19, " %-40s ", s[i]);
     }
   }
 
-  if (count <= 13) {
+  if (count <= 13)
+  {
     mvprintw(count + 6, 19, " %-40s ", "");
     mvprintw(count + 7, 19, " %-40s ", "Hit escape to continue.");
     while (getch() != 27 /* escape */)
       ;
-  } else {
+  }
+  else
+  {
     mvprintw(19, 19, " %-40s ", "");
     mvprintw(20, 19, " %-40s ",
              "Arrows to scroll, escape to continue.");
@@ -325,20 +353,23 @@ static void io_list_trainers()
   Character **c;
   uint32_t x, y, count;
 
-  c = (Character **) malloc(world.cur_map->num_trainers * sizeof (*c));
+  c = (Character **)malloc(world.cur_map->num_trainers * sizeof(*c));
 
   /* Get a linear list of trainers */
-  for (count = 0, y = 1; y < MAP_Y - 1; y++) {
-    for (x = 1; x < MAP_X - 1; x++) {
+  for (count = 0, y = 1; y < MAP_Y - 1; y++)
+  {
+    for (x = 1; x < MAP_X - 1; x++)
+    {
       if (world.cur_map->cmap[y][x] && world.cur_map->cmap[y][x] !=
-          &world.pc) {
+                                           &world.pc)
+      {
         c[count++] = world.cur_map->cmap[y][x];
       }
     }
   }
 
   /* Sort it by distance from PC */
-  qsort(c, count, sizeof (*c), compare_trainer_distance);
+  qsort(c, count, sizeof(*c), compare_trainer_distance);
 
   /* Display it */
   io_list_trainers_display((Npc **)(c), count);
@@ -370,12 +401,14 @@ void io_battle(Character *aggressor, Character *defender)
   mvprintw(0, 0, "Aww, how'd you get so strong?  You and your pokemon must share a special bond!");
   refresh();
   getch();
-  if (!(npc = dynamic_cast<Npc *>(aggressor))) {
+  if (!(npc = dynamic_cast<Npc *>(aggressor)))
+  {
     npc = dynamic_cast<Npc *>(defender);
   }
-  
+
   npc->defeated = 1;
-  if (npc->ctype == char_hiker || npc->ctype == char_rival) {
+  if (npc->ctype == char_hiker || npc->ctype == char_rival)
+  {
     npc->mtype = move_wander;
   }
 }
@@ -385,7 +418,8 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
   dest[dim_y] = world.pc.pos[dim_y];
   dest[dim_x] = world.pc.pos[dim_x];
 
-  switch (input) {
+  switch (input)
+  {
   case 1:
   case 2:
   case 3:
@@ -401,7 +435,8 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
     dest[dim_y]--;
     break;
   }
-  switch (input) {
+  switch (input)
+  {
   case 1:
   case 4:
   case 7:
@@ -418,40 +453,47 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
     break;
   case '>':
     if (world.cur_map->map[world.pc.pos[dim_y]][world.pc.pos[dim_x]] ==
-        ter_mart) {
+        ter_mart)
+    {
       io_pokemart();
     }
     if (world.cur_map->map[world.pc.pos[dim_y]][world.pc.pos[dim_x]] ==
-        ter_center) {
+        ter_center)
+    {
       io_pokemon_center();
     }
     break;
   }
 
   if ((world.cur_map->map[dest[dim_y]][dest[dim_x]] == ter_exit) &&
-      (input == 1 || input == 3 || input == 7 || input == 9)) {
+      (input == 1 || input == 3 || input == 7 || input == 9))
+  {
     // Exiting diagonally leads to complicated entry into the new map
     // in order to avoid INT_MAX move costs in the destination.
     // Most easily solved by disallowing such entries here.
     return 1;
   }
 
-  if (world.cur_map->cmap[dest[dim_y]][dest[dim_x]]) {
+  if (world.cur_map->cmap[dest[dim_y]][dest[dim_x]])
+  {
     if (dynamic_cast<Npc *>(world.cur_map->cmap[dest[dim_y]][dest[dim_x]]) &&
-        ((Npc *) world.cur_map->cmap[dest[dim_y]][dest[dim_x]])->defeated) {
+        ((Npc *)world.cur_map->cmap[dest[dim_y]][dest[dim_x]])->defeated)
+    {
       // Some kind of greeting here would be nice
       return 1;
-    } else if (dynamic_cast<Npc *>
-               (world.cur_map->cmap[dest[dim_y]][dest[dim_x]])) {
+    }
+    else if (dynamic_cast<Npc *>(world.cur_map->cmap[dest[dim_y]][dest[dim_x]]))
+    {
       io_battle(&world.pc, world.cur_map->cmap[dest[dim_y]][dest[dim_x]]);
       // Not actually moving, so set dest back to PC position
       dest[dim_x] = world.pc.pos[dim_x];
       dest[dim_y] = world.pc.pos[dim_y];
     }
   }
-  
+
   if (move_cost[char_pc][world.cur_map->map[dest[dim_y]][dest[dim_x]]] ==
-      INT_MAX) {
+      INT_MAX)
+  {
     return 1;
   }
 
@@ -461,34 +503,38 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
 void io_teleport_world(pair_t dest)
 {
   int x, y;
-  
+
   world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
 
   mvprintw(0, 0, "Enter x [-200, 200]: ");
   refresh();
   echo();
   curs_set(1);
-  mvscanw(0, 21, (char *) "%d", &x);
+  mvscanw(0, 21, (char *)"%d", &x);
   mvprintw(0, 0, "Enter y [-200, 200]:          ");
   refresh();
-  mvscanw(0, 21, (char *) "%d", &y);
+  mvscanw(0, 21, (char *)"%d", &y);
   refresh();
   noecho();
   curs_set(0);
 
-  if (x < -200) {
+  if (x < -200)
+  {
     x = -200;
   }
-  if (x > 200) {
+  if (x > 200)
+  {
     x = 200;
   }
-  if (y < -200) {
+  if (y < -200)
+  {
     y = -200;
   }
-  if (y > 200) {
+  if (y > 200)
+  {
     y = 200;
   }
-  
+
   x += 200;
   y += 200;
 
@@ -502,28 +548,35 @@ void io_teleport_world(pair_t dest)
 void io_encounter_pokemon()
 {
   Pokemon *p;
-  
+
   int md = (abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)) +
             abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)));
   int minl, maxl;
-  
-  if (md <= 200) {
+
+  if (md <= 200)
+  {
     minl = 1;
     maxl = md / 2;
-  } else {
+  }
+  else
+  {
     minl = (md - 200) / 2;
     maxl = 100;
   }
-  if (minl < 1) {
+  if (minl < 1)
+  {
     minl = 1;
   }
-  if (minl > 100) {
+  if (minl > 100)
+  {
     minl = 100;
   }
-  if (maxl < 1) {
+  if (maxl < 1)
+  {
     maxl = 1;
   }
-  if (maxl > 100) {
+  if (maxl > 100)
+  {
     maxl = 100;
   }
 
@@ -531,16 +584,109 @@ void io_encounter_pokemon()
 
   //  std::cerr << *p << std::endl << std::endl;
 
-  io_queue_message("%s%s%s: HP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
-                   p->is_shiny() ? "*" : "", p->get_species(),
-                   p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
-                   p->get_def(), p->get_spatk(), p->get_spdef(),
-                   p->get_speed(), p->get_gender_string());
-  io_queue_message("%s's moves: %s %s", p->get_species(),
-                   p->get_move(0), p->get_move(1));
+  // io_queue_message("%s%s%s: HP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+  //                  p->is_shiny() ? "*" : "", p->get_species(),
+  //                  p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
+  //                  p->get_def(), p->get_spatk(), p->get_spdef(),
+  //                  p->get_speed(), p->get_gender_string());
+  // io_queue_message("%s's moves: %s %s", p->get_species(),
+  //                  p->get_move(0), p->get_move(1));
 
-  // Later on, don't delete if captured
-  delete p;
+  clear();
+  mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+           p->is_shiny() ? "*" : "", p->get_species(),
+           p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
+           p->get_def(), p->get_spatk(), p->get_spdef(),
+           p->get_speed(), p->get_gender_string());
+  refresh();
+  io_fightPoke(p);
+}
+
+void io_backpack()
+{
+  clear();
+  mvprintw(0, 0, "Backpack contents:\n");
+  unsigned i;
+  for (i = 0; i != world.pc.item.size(); i++)
+  {
+    mvprintw(i + 1, 5, "%d.\t%d %s\n", i + 1, world.pc.num.at(i), world.pc.item.at(i).c_str());
+  }
+  refresh();
+  getch();
+}
+
+void io_choose()
+{
+  Pokemon *p1 = new Pokemon(1);
+  Pokemon *p2 = new Pokemon(1);
+  Pokemon *p3 = new Pokemon(1);
+  mvprintw(0, 0, "Choose a pokemon: ");
+  mvprintw(1, 5, "1. %s", p1->get_species());
+  mvprintw(2, 5, "2. %s", p2->get_species());
+  mvprintw(3, 5, "3. %s", p3->get_species());
+
+  refresh();
+
+  char input = getch();
+  while (input != '1' && input != '2' && input != '3')
+  {
+    mvprintw(4, 5, "Please choose a pokemon, input was %c choices were %c %c or %c", input, '1', '2', '3');
+    refresh();
+    input = getch();
+  }
+
+  int i;
+  for (i = 0; i < 6; i++)
+  {
+    world.pc.pokemons[i] = NULL;
+  }
+
+  switch (input)
+  {
+  case '1':
+    world.pc.pokemons[0] = p1;
+    delete p2;
+    delete p3;
+    break;
+
+  case '2':
+    world.pc.pokemons[0] = p2;
+    delete p1;
+    delete p3;
+    break;
+
+  case '3':
+    world.pc.pokemons[0] = p3;
+    delete p1;
+    delete p2;
+    break;
+  }
+
+  clear();
+
+  mvprintw(0, 0, "You have choosen %s", world.pc.pokemons[0]->get_species());
+  refresh();
+  getch();
+}
+
+void io_fightTrainer(Character *npc)
+{
+  
+}
+
+void io_fightPoke(Pokemon *p)
+{
+  Pokemon *cur = world.pc.pokemons[0];
+  mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+           p->is_shiny() ? "*" : "", p->get_species(),
+           p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
+           p->get_def(), p->get_spatk(), p->get_spdef(),
+           p->get_speed(), p->get_gender_string());
+  mvprintw(5, 0, "%s, I choose you!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d  \nMoves: 1. %s\n2. %s", cur->get_species(), cur->get_hp(), cur->get_atk(),
+           cur->get_def(), cur->get_spatk(), cur->get_spdef(), cur->get_speed(), cur->get_move(0), cur->get_move(1));
+  mvprintw(10, 0, "select an action: \n(1) move 1\n(2) move 2\n(b) backpack\n(r) run");
+  refresh();
+  getch();
 }
 
 void io_handle_input(pair_t dest)
@@ -548,8 +694,10 @@ void io_handle_input(pair_t dest)
   uint32_t turn_not_consumed;
   int key;
 
-  do {
-    switch (key = getch()) {
+  do
+  {
+    switch (key = getch())
+    {
     case '7':
     case 'y':
     case KEY_HOME:
@@ -622,6 +770,11 @@ void io_handle_input(pair_t dest)
       io_list_trainers();
       turn_not_consumed = 1;
       break;
+
+    case 'B':
+      io_backpack();
+      break;
+
     case 'q':
       /* Demonstrate use of the message queue.  You can use this for *
        * printf()-style debugging (though gdb is probably a better   *

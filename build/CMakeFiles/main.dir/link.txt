@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/main.dir/character.cpp.o CMakeFiles/main.dir/db_parse.cpp.o CMakeFiles/main.dir/heap.c.o CMakeFiles/main.dir/io.cpp.o CMakeFiles/main.dir/poke327.cpp.o CMakeFiles/main.dir/pokemon.cpp.o -o main  -lncurses -ltinfo 
