@@ -1,9 +1,10 @@
 #ifndef POKEMON_H
-# define POKEMON_H
+#define POKEMON_H
 
-# include <iostream>
+#include <iostream>
 
-enum pokemon_stat {
+enum pokemon_stat
+{
   stat_hp,
   stat_atk,
   stat_def,
@@ -12,22 +13,26 @@ enum pokemon_stat {
   stat_speed
 };
 
-enum pokemon_gender {
+enum pokemon_gender
+{
   gender_female,
   gender_male
 };
 
-class Pokemon {
- private:
+class Pokemon
+{
+private:
   int level;
   int pokemon_index;
   int move_index[4];
   int pokemon_species_index;
   int IV[6];
   int effective_stat[6];
+  int hp;
   bool shiny;
   pokemon_gender gender;
- public:
+
+public:
   Pokemon(int level);
   const char *get_species() const;
   int get_hp() const;
@@ -36,6 +41,8 @@ class Pokemon {
   int get_spatk() const;
   int get_spdef() const;
   int get_speed() const;
+  int get_dam(int moveIdx, int rand);
+  void set_hp(int hpchg);
   const char *get_gender_string() const;
   bool is_shiny() const;
   const char *get_move(int i) const;

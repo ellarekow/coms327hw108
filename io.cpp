@@ -671,22 +671,58 @@ void io_choose()
 
 void io_fightTrainer(Character *npc)
 {
-  
 }
 
 void io_fightPoke(Pokemon *p)
 {
-  Pokemon *cur = world.pc.pokemons[0];
-  mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
-           p->is_shiny() ? "*" : "", p->get_species(),
-           p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
-           p->get_def(), p->get_spatk(), p->get_spdef(),
-           p->get_speed(), p->get_gender_string());
-  mvprintw(5, 0, "%s, I choose you!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d  \nMoves: 1. %s\n2. %s", cur->get_species(), cur->get_hp(), cur->get_atk(),
-           cur->get_def(), cur->get_spatk(), cur->get_spdef(), cur->get_speed(), cur->get_move(0), cur->get_move(1));
-  mvprintw(10, 0, "select an action: \n(1) move 1\n(2) move 2\n(b) backpack\n(r) run");
-  refresh();
-  getch();
+  int battle = 1;
+  int runs = 1;
+  while (battle)
+  {
+    Pokemon *cur = world.pc.pokemons[0];
+    mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+             p->is_shiny() ? "*" : "", p->get_species(),
+             p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
+             p->get_def(), p->get_spatk(), p->get_spdef(),
+             p->get_speed(), p->get_gender_string());
+    mvprintw(5, 0, "%s, I choose you!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d  \nMoves: 1. %s\n2. %s", cur->get_species(), cur->get_hp(), cur->get_atk(),
+             cur->get_def(), cur->get_spatk(), cur->get_spdef(), cur->get_speed(), cur->get_move(0), cur->get_move(1));
+    mvprintw(10, 0, "select an action: \n(1) move 1\n(2) move 2\n(b) backpack\n(r) run");
+    refresh();
+    char input = getch();
+    if (input == '1' || input == '2')
+    {
+      int move = 0;
+      if (input == '2')
+        move = 2;
+      int dam = cur->get_dam(move, rand() % 16 + 85);
+      p->set_hp(-1 * dam);
+      clear();
+      mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+               p->is_shiny() ? "*" : "", p->get_species(),
+               p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
+               p->get_def(), p->get_spatk(), p->get_spdef(),
+               p->get_speed(), p->get_gender_string());
+      mvprintw(5, 0, "%s, I choose you!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d  \nMoves: 1. %s\n2. %s", cur->get_species(), cur->get_hp(), cur->get_atk(),
+               cur->get_def(), cur->get_spatk(), cur->get_spdef(), cur->get_speed(), cur->get_move(0), cur->get_move(1));
+      mvprintw(10, 0, "%s did %d damage!", cur->get_species(), dam);
+      refresh();
+      getch();
+    }
+    else if (input == 'b')
+      io_backpack();
+
+    else if (input == 'r')
+    {
+      int odds = ((cur->get_speed() * 32) / ((p->get_speed() / 4) % 256)) + 30 * runs;
+      runs++;
+      if (odds > rand() % 256)
+        battle = 0;
+    }
+
+    if (p->get_hp() == 0)
+      battle = 0;
+  }
 }
 
 void io_handle_input(pair_t dest)

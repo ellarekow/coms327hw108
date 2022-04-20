@@ -1,12 +1,14 @@
 #include <cstdlib>
 #include <algorithm>
+#include <stdlib.h>
 
+#include "poke327.h"
 #include "pokemon.h"
 #include "db_parse.h"
 
 static int compare_move(const void *v1, const void *v2)
 {
-  return ((levelup_move *) v1)->level - ((levelup_move *) v2)->level;
+  return ((levelup_move *)v1)->level - ((levelup_move *)v2)->level;
 }
 
 Pokemon::Pokemon(int level) : level(level)
@@ -16,33 +18,40 @@ Pokemon::Pokemon(int level) : level(level)
   bool found;
 
   // Subtract 1 because array is 1-indexed
-  pokemon_species_index = rand() % ((sizeof (species) /
-                                     sizeof (species[0])) - 1);
+  pokemon_species_index = rand() % ((sizeof(species) /
+                                     sizeof(species[0])) -
+                                    1);
   s = species + pokemon_species_index;
-  
-  if (!s->levelup_moves) {
+
+  if (!s->levelup_moves)
+  {
     // We have never generated a pokemon of this species before, so we
     // need to find it's level-up moveset and save it for next time.
     for (s->num_levelup_moves = 0, i = 1;
-         i < (sizeof (pokemon_moves) / sizeof (pokemon_moves[0]));
-         i++) {
+         i < (sizeof(pokemon_moves) / sizeof(pokemon_moves[0]));
+         i++)
+    {
       if (s->id == pokemon_moves[i].pokemon_id &&
-          pokemon_moves[i].pokemon_move_method_id == 1) {
-        for (found = false, j = 0; !found && j < s->num_levelup_moves; j++) {
-          if (s->levelup_moves[j].move == pokemon_moves[i].move_id) {
+          pokemon_moves[i].pokemon_move_method_id == 1)
+      {
+        for (found = false, j = 0; !found && j < s->num_levelup_moves; j++)
+        {
+          if (s->levelup_moves[j].move == pokemon_moves[i].move_id)
+          {
             found = true;
           }
         }
-        if (!found) {
+        if (!found)
+        {
           s->num_levelup_moves++;
           s->levelup_moves = ((levelup_move *)
-                              realloc(s->levelup_moves,
-                                      (s->num_levelup_moves *
-                                       sizeof (*s->levelup_moves))));
+                                  realloc(s->levelup_moves,
+                                          (s->num_levelup_moves *
+                                           sizeof(*s->levelup_moves))));
           s->levelup_moves[s->num_levelup_moves - 1].level =
-            pokemon_moves[i].level;
+              pokemon_moves[i].level;
           s->levelup_moves[s->num_levelup_moves - 1].move =
-            pokemon_moves[i].move_id;
+              pokemon_moves[i].move_id;
         }
       }
     }
@@ -50,7 +59,7 @@ Pokemon::Pokemon(int level) : level(level)
     // through leveling up.  Now we'll sort it by level to make that process
     // simpler.
     qsort(s->levelup_moves, s->num_levelup_moves,
-          sizeof (*s->levelup_moves), compare_move);
+          sizeof(*s->levelup_moves), compare_move);
 
     // Also initialize base stats while we're here
     s->base_stat[0] = pokemon_stats[pokemon_species_index * 6 - 5].base_stat;
@@ -70,10 +79,13 @@ Pokemon::Pokemon(int level) : level(level)
   // 0 is an invalid index, since the array is 1 indexed.
   move_index[0] = move_index[1] = move_index[2] = move_index[3] = 0;
   // I don't think 0 moves is possible, but account for it to be safe
-  if (i) {
+  if (i)
+  {
     move_index[0] = s->levelup_moves[rand() % i].move;
-    if (i != 1) {
-      do {
+    if (i != 1)
+    {
+      do
+      {
         j = rand() % i;
       } while (s->levelup_moves[j].move == move_index[0]);
       move_index[1] = s->levelup_moves[j].move;
@@ -81,16 +93,20 @@ Pokemon::Pokemon(int level) : level(level)
   }
 
   // Calculate IVs
-  for (i = 0; i < 6; i++) {
+  for (i = 0; i < 6; i++)
+  {
     IV[i] = rand() & 0xf;
     effective_stat[i] = 5 + ((s->base_stat[i] + IV[i]) * 2 * level) / 100;
-    if (i == 0) { // HP
+    if (i == 0)
+    { // HP
       effective_stat[i] += 5 + level;
     }
   }
 
   shiny = ((rand() & 0x1fff) ? false : true);
   gender = ((rand() & 0x1fff) ? gender_female : gender_male);
+
+  hp = effective_stat[stat_hp];
 }
 
 const char *Pokemon::get_species() const
@@ -100,7 +116,7 @@ const char *Pokemon::get_species() const
 
 int Pokemon::get_hp() const
 {
-  return effective_stat[stat_hp];
+  return hp;
 }
 
 int Pokemon::get_atk() const
@@ -138,11 +154,21 @@ bool Pokemon::is_shiny() const
   return shiny;
 }
 
+void Pokemon::set_hp(int hpchg)
+{
+  hp += hpchg;
+  if(hp < 0)
+    hp = 0;
+}
+
 const char *Pokemon::get_move(int i) const
 {
-  if (i < 4 && move_index[i]) {
+  if (i < 4 && move_index[i])
+  {
     return moves[move_index[i]].identifier;
-  } else {
+  }
+  else
+  {
     return "";
   }
 }
@@ -174,22 +200,27 @@ std::ostream &Pokemon::print(std::ostream &o) const
     << "  SPDEFBASE:" << s->base_stat[stat_spdef] << std::endl
     << "  SPEEDBASE:" << s->base_stat[stat_speed] << std::endl;
 
-  o << "  Levelup moves: " << std::endl; 
-  for (i = 0; i < s->num_levelup_moves; i++) {
+  o << "  Levelup moves: " << std::endl;
+  for (i = 0; i < s->num_levelup_moves; i++)
+  {
     o << "    " << moves[s->levelup_moves[i].move].identifier
       << ":" << s->levelup_moves[i].level << std::endl;
   }
   o << "  Known moves: " << std::endl;
-  if (move_index[0]) {
+  if (move_index[0])
+  {
     o << "    " << moves[move_index[0]].identifier << std::endl;
   }
-  if (move_index[1]) {
+  if (move_index[1])
+  {
     o << "    " << moves[move_index[1]].identifier << std::endl;
   }
-  if (move_index[2]) {
+  if (move_index[2])
+  {
     o << "    " << moves[move_index[2]].identifier << std::endl;
   }
-  if (move_index[3]) {
+  if (move_index[3])
+  {
     o << "    " << moves[move_index[3]].identifier << std::endl;
   }
 
@@ -199,4 +230,14 @@ std::ostream &Pokemon::print(std::ostream &o) const
 std::ostream &operator<<(std::ostream &o, const Pokemon &p)
 {
   return p.print(o);
+}
+
+int Pokemon::get_dam(int moveIdx, int rand)
+{
+  int crit = 1;
+  int type = 1;
+  int STAB = 1;
+
+  return (((((2 * level) / 5) + 2) * moves[move_index[moveIdx]].power * (effective_stat[stat_atk] / effective_stat[stat_def]) / 50) + 2) *
+         crit * rand * STAB * type;
 }
