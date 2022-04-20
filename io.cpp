@@ -404,6 +404,7 @@ void io_battle(Character *aggressor, Character *defender)
   if (!(npc = dynamic_cast<Npc *>(aggressor)))
   {
     npc = dynamic_cast<Npc *>(defender);
+    io_fightTrainer(npc);
   }
 
   npc->defeated = 1;
@@ -602,15 +603,33 @@ void io_encounter_pokemon()
   io_fightPoke(p);
 }
 
-void io_backpack()
+void io_backpack(int inBattle)
+{
+  while (1)
+  {
+    clear();
+    mvprintw(0, 0, "Backpack contents:\n");
+    unsigned i;
+    for (i = 0; i != world.pc.item.size(); i++)
+    {
+      mvprintw(i + 1, 5, "%d.\t%d %s\n", i + 1, world.pc.num.at(i), world.pc.item.at(i).c_str());
+    }
+    mvprintw(i + 1, 5, "press (q) to return");
+    refresh();
+    char input = getch();
+    if ((int)input <= (int)i)
+      io_getItem(inBattle, (int)input - 1);
+    else if (input == 'q')
+      break;
+    mvprintw(i + 2, 5, "you entered: %c please enter a valid input", input);
+    refresh();
+  }
+}
+
+void io_getItem(int inBattle, int itemIdx)
 {
   clear();
-  mvprintw(0, 0, "Backpack contents:\n");
-  unsigned i;
-  for (i = 0; i != world.pc.item.size(); i++)
-  {
-    mvprintw(i + 1, 5, "%d.\t%d %s\n", i + 1, world.pc.num.at(i), world.pc.item.at(i).c_str());
-  }
+  mvprintw(0, 0, "you have choosen %s", world.pc.item[itemIdx]);
   refresh();
   getch();
 }
@@ -669,15 +688,127 @@ void io_choose()
   getch();
 }
 
-void io_fightTrainer(Character *npc)
+void io_fightTrainer(Npc *npc)
 {
+  int i = 0;
+  for (i = 0; i < 6; i++)
+  {
+    npc->pokemons[i] = NULL;
+  }
+
+  i = 0;
+
+  int md = (abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)) +
+            abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)));
+  int minl, maxl;
+
+  if (md <= 200)
+  {
+    minl = 1;
+    maxl = md / 2;
+  }
+  else
+  {
+    minl = (md - 200) / 2;
+    maxl = 100;
+  }
+  if (minl < 1)
+  {
+    minl = 1;
+  }
+  if (minl > 100)
+  {
+    minl = 100;
+  }
+  if (maxl < 1)
+  {
+    maxl = 1;
+  }
+  if (maxl > 100)
+  {
+    maxl = 100;
+  }
+
+  int numOfPoke = 0;
+
+  for (i = 0; i < rand() % 6 + 1; i++)
+  {
+    npc->pokemons[i] = new Pokemon(rand() % (maxl - minl + 1) + minl);
+    numOfPoke++;
+  }
+
+  int battle = 1;
+  int npcCurPIdx = 0;
+
+  Pokemon *npcPoke = npc->pokemons[npcCurPIdx];
+  Pokemon *cur = world.pc.pokemons[0];
+
+  do
+  {
+    clear();
+    if (npcPoke->get_hp() == 0)
+    {
+      npcCurPIdx++;
+      if (npcCurPIdx > numOfPoke)
+        battle = 0;
+
+      else if (npc->pokemons[npcCurPIdx] == NULL)
+        battle = 0;
+
+      else
+        npcPoke = npc->pokemons[npcCurPIdx];
+    }
+    else if (cur->get_hp() == 0)
+      battle = 0;
+
+    mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+             npcPoke->is_shiny() ? "*" : "", npcPoke->get_species(),
+             npcPoke->is_shiny() ? "*" : "", npcPoke->get_hp(), npcPoke->get_atk(),
+             npcPoke->get_def(), npcPoke->get_spatk(), npcPoke->get_spdef(),
+             npcPoke->get_speed(), npcPoke->get_gender_string());
+    mvprintw(5, 0, "%s, I choose you!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d  \nMoves: 1. %s\n2. %s", cur->get_species(), cur->get_hp(), cur->get_atk(),
+             cur->get_def(), cur->get_spatk(), cur->get_spdef(), cur->get_speed(), cur->get_move(0), cur->get_move(1));
+    mvprintw(10, 0, "select an action: \n(1) move 1\n(2) move 2\n(b) backpack");
+    refresh();
+    char input = getch();
+    int dam;
+    if (input == '1' || input == '2')
+    {
+      int move = 0;
+      if (input == '2')
+        move = 2;
+      dam = cur->get_dam(move, rand() % 16 + 85);
+      npcPoke->set_hp(-1 * dam);
+      clear();
+      mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+               npcPoke->is_shiny() ? "*" : "", npcPoke->get_species(),
+               npcPoke->is_shiny() ? "*" : "", npcPoke->get_hp(), npcPoke->get_atk(),
+               npcPoke->get_def(), npcPoke->get_spatk(), npcPoke->get_spdef(),
+               npcPoke->get_speed(), npcPoke->get_gender_string());
+      mvprintw(5, 0, "%s, I choose you!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d  \nMoves: 1. %s\n2. %s", cur->get_species(), cur->get_hp(), cur->get_atk(),
+               cur->get_def(), cur->get_spatk(), cur->get_spdef(), cur->get_speed(), cur->get_move(0), cur->get_move(1));
+      mvprintw(10, 0, "%s did %d damage!", cur->get_species(), dam);
+      refresh();
+      getch();
+    }
+    else if (input == 'b')
+      io_backpack(1);
+
+    dam = npcPoke->get_dam(rand() % 1 + 1, rand() % 16 + 85);
+    cur->set_hp(-1 * dam);
+    mvprintw(10, 0, "%s did %d damage!", npcPoke->get_species(), dam);
+    refresh();
+    getch();
+    if (cur->get_hp() == 0)
+      battle = 0;
+  } while (battle);
 }
 
 void io_fightPoke(Pokemon *p)
 {
   int battle = 1;
   int runs = 1;
-  while (battle)
+  do
   {
     Pokemon *cur = world.pc.pokemons[0];
     mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
@@ -690,12 +821,13 @@ void io_fightPoke(Pokemon *p)
     mvprintw(10, 0, "select an action: \n(1) move 1\n(2) move 2\n(b) backpack\n(r) run");
     refresh();
     char input = getch();
+    int dam;
     if (input == '1' || input == '2')
     {
       int move = 0;
       if (input == '2')
         move = 2;
-      int dam = cur->get_dam(move, rand() % 16 + 85);
+      dam = cur->get_dam(move, rand() % 16 + 85);
       p->set_hp(-1 * dam);
       clear();
       mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
@@ -710,7 +842,7 @@ void io_fightPoke(Pokemon *p)
       getch();
     }
     else if (input == 'b')
-      io_backpack();
+      io_backpack(1);
 
     else if (input == 'r')
     {
@@ -719,10 +851,18 @@ void io_fightPoke(Pokemon *p)
       if (odds > rand() % 256)
         battle = 0;
     }
-
     if (p->get_hp() == 0)
       battle = 0;
-  }
+
+    dam = p->get_dam(rand() % 1 + 1, rand() % 16 + 85);
+    cur->set_hp(-1 * dam);
+    mvprintw(10, 0, "%s did %d damage!", p->get_species(), dam);
+    refresh();
+    getch();
+    if (cur->get_hp() == 0)
+      battle = 0;
+  } while (battle);
+  
 }
 
 void io_handle_input(pair_t dest)
@@ -808,7 +948,7 @@ void io_handle_input(pair_t dest)
       break;
 
     case 'B':
-      io_backpack();
+      io_backpack(0);
       break;
 
     case 'q':
