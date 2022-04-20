@@ -41,6 +41,7 @@ public:
   int get_spatk() const;
   int get_spdef() const;
   int get_speed() const;
+  int get_acc(int moveIdx);
   int get_dam(int moveIdx, int rand);
   void set_hp(int hpchg);
   const char *get_gender_string() const;

@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <stdlib.h>
+#include <math.h>
 
 #include "poke327.h"
 #include "pokemon.h"
@@ -157,7 +158,7 @@ bool Pokemon::is_shiny() const
 void Pokemon::set_hp(int hpchg)
 {
   hp += hpchg;
-  if(hp < 0)
+  if (hp < 0)
     hp = 0;
 }
 
@@ -238,6 +239,22 @@ int Pokemon::get_dam(int moveIdx, int rand)
   int type = 1;
   int STAB = 1;
 
-  return (((((2 * level) / 5) + 2) * moves[move_index[moveIdx]].power * (effective_stat[stat_atk] / effective_stat[stat_def]) / 50) + 2) *
-         crit * rand * STAB * type;
+  int power = moves[move_index[moveIdx]].power;
+  if (power < 1)
+  {
+    power = 1;
+  }
+
+  double damage = (double)((double)(((double)((2 * level) / 5) + 2) * power * (double)(effective_stat[stat_atk] / effective_stat[stat_def]) / 50) + 2) *
+                  crit * (double)(rand / 100) * STAB * type;
+
+  if (damage == 0)
+    damage = 1;
+
+  return (int)ceil(damage);
+}
+
+int Pokemon::get_acc(int moveIdx)
+{
+  return (int)ceil(moves[move_index[moveIdx]].accuracy);
 }

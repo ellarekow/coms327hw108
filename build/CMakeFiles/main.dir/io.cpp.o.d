@@ -170,7 +170,7 @@ CMakeFiles/main.dir/io.cpp.o: \
  /usr/include/c++/11/bits/basic_ios.tcc \
  /usr/include/c++/11/bits/ostream.tcc /usr/include/c++/11/istream \
  /usr/include/c++/11/bits/istream.tcc \
- /home/ellarekow/Documents/COMS327/coms327hw108/character.h \
  /home/ellarekow/Documents/COMS327/coms327hw108/poke327.h \
  /usr/include/assert.h /usr/include/c++/11/cstring \
- /home/ellarekow/Documents/COMS327/coms327hw108/heap.h
+ /home/ellarekow/Documents/COMS327/coms327hw108/heap.h \
+ /home/ellarekow/Documents/COMS327/coms327hw108/character.h

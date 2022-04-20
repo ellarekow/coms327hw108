@@ -404,8 +404,8 @@ void io_battle(Character *aggressor, Character *defender)
   if (!(npc = dynamic_cast<Npc *>(aggressor)))
   {
     npc = dynamic_cast<Npc *>(defender);
-    io_fightTrainer(npc);
   }
+  io_fightTrainer(npc);
 
   npc->defeated = 1;
   if (npc->ctype == char_hiker || npc->ctype == char_rival)
@@ -761,7 +761,7 @@ void io_fightTrainer(Npc *npc)
     else if (cur->get_hp() == 0)
       battle = 0;
 
-    mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+    mvprintw(0, 0, "You are battling trainer's %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
              npcPoke->is_shiny() ? "*" : "", npcPoke->get_species(),
              npcPoke->is_shiny() ? "*" : "", npcPoke->get_hp(), npcPoke->get_atk(),
              npcPoke->get_def(), npcPoke->get_spatk(), npcPoke->get_spdef(),
@@ -777,8 +777,12 @@ void io_fightTrainer(Npc *npc)
       int move = 0;
       if (input == '2')
         move = 2;
+
       dam = cur->get_dam(move, rand() % 16 + 85);
-      npcPoke->set_hp(-1 * dam);
+      if (cur->get_acc(move) > rand() % 100)
+        npcPoke->set_hp(-1 * dam);
+      else
+        dam = -1;
       clear();
       mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
                npcPoke->is_shiny() ? "*" : "", npcPoke->get_species(),
@@ -787,20 +791,31 @@ void io_fightTrainer(Npc *npc)
                npcPoke->get_speed(), npcPoke->get_gender_string());
       mvprintw(5, 0, "%s, I choose you!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d  \nMoves: 1. %s\n2. %s", cur->get_species(), cur->get_hp(), cur->get_atk(),
                cur->get_def(), cur->get_spatk(), cur->get_spdef(), cur->get_speed(), cur->get_move(0), cur->get_move(1));
-      mvprintw(10, 0, "%s did %d damage!", cur->get_species(), dam);
+      refresh();
+      if (dam == -1)
+        mvprintw(10, 0, "%s missed", cur->get_species());
+      else
+        mvprintw(10, 0, "%s did %d damage!", cur->get_species(), dam);
       refresh();
       getch();
     }
     else if (input == 'b')
       io_backpack(1);
-
     dam = npcPoke->get_dam(rand() % 1 + 1, rand() % 16 + 85);
-    cur->set_hp(-1 * dam);
-    mvprintw(10, 0, "%s did %d damage!", npcPoke->get_species(), dam);
+    if (npcPoke->get_acc(rand() % 1 + 1) > rand() % 100)
+      cur->set_hp(-1 * dam);
+    else
+      dam = -1;
+    if (dam == -1)
+      mvprintw(10, 0, "%s missed", npcPoke->get_species());
+    else
+      mvprintw(10, 0, "%s did %d damage!", npcPoke->get_species(), dam);
     refresh();
     getch();
     if (cur->get_hp() == 0)
       battle = 0;
+
+    clear();
   } while (battle);
 }
 
@@ -828,7 +843,10 @@ void io_fightPoke(Pokemon *p)
       if (input == '2')
         move = 2;
       dam = cur->get_dam(move, rand() % 16 + 85);
-      p->set_hp(-1 * dam);
+      if (cur->get_acc(move) > rand() % 100)
+        p->set_hp(-1 * dam);
+      else
+        dam = -1;
       clear();
       mvprintw(0, 0, "You have enountered a %s%s%s!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
                p->is_shiny() ? "*" : "", p->get_species(),
@@ -837,7 +855,10 @@ void io_fightPoke(Pokemon *p)
                p->get_speed(), p->get_gender_string());
       mvprintw(5, 0, "%s, I choose you!\n\tHP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d  \nMoves: 1. %s\n2. %s", cur->get_species(), cur->get_hp(), cur->get_atk(),
                cur->get_def(), cur->get_spatk(), cur->get_spdef(), cur->get_speed(), cur->get_move(0), cur->get_move(1));
-      mvprintw(10, 0, "%s did %d damage!", cur->get_species(), dam);
+      if (dam == -1)
+        mvprintw(10, 0, "%s missed", cur->get_species());
+      else
+        mvprintw(10, 0, "%s did %d damage!", cur->get_species(), dam);
       refresh();
       getch();
     }
@@ -855,14 +876,22 @@ void io_fightPoke(Pokemon *p)
       battle = 0;
 
     dam = p->get_dam(rand() % 1 + 1, rand() % 16 + 85);
-    cur->set_hp(-1 * dam);
-    mvprintw(10, 0, "%s did %d damage!", p->get_species(), dam);
+    if (p->get_acc(rand() % 1 + 1) > rand() % 100)
+      cur->set_hp(-1 * dam);
+    else
+      dam = -1;
+
+    if (dam == -1)
+      mvprintw(10, 0, "%s missed", p->get_species());
+    else
+      mvprintw(10, 0, "%s did %d damage!", p->get_species(), dam);
     refresh();
     getch();
     if (cur->get_hp() == 0)
       battle = 0;
+
+    clear();
   } while (battle);
-  
 }
 
 void io_handle_input(pair_t dest)

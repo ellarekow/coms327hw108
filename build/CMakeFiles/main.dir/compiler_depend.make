@@ -601,11 +601,11 @@ CMakeFiles/main.dir/io.cpp.o: ../io.cpp \
   /usr/include/c++/11/bits/ostream.tcc \
   /usr/include/c++/11/istream \
   /usr/include/c++/11/bits/istream.tcc \
-  ../character.h \
   ../poke327.h \
   /usr/include/assert.h \
   /usr/include/c++/11/cstring \
-  ../heap.h
+  ../heap.h \
+  ../character.h
 
 CMakeFiles/main.dir/poke327.cpp.o: ../poke327.cpp \
   /usr/include/stdc-predef.h \
@@ -955,6 +955,32 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
   /usr/include/c++/11/bits/vector.tcc \
   /usr/include/c++/11/pstl/execution_defs.h \
   /usr/include/c++/11/stdlib.h \
+  /usr/include/c++/11/math.h \
+  /usr/include/c++/11/cmath \
+  /usr/include/math.h \
+  /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
+  /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
+  /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
+  /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
+  /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
+  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+  /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
+  /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+  /usr/include/c++/11/bits/specfun.h \
+  /usr/include/c++/11/limits \
+  /usr/include/c++/11/tr1/gamma.tcc \
+  /usr/include/c++/11/tr1/special_function_util.h \
+  /usr/include/c++/11/tr1/bessel_function.tcc \
+  /usr/include/c++/11/tr1/beta_function.tcc \
+  /usr/include/c++/11/tr1/ell_integral.tcc \
+  /usr/include/c++/11/tr1/exp_integral.tcc \
+  /usr/include/c++/11/tr1/hypergeometric.tcc \
+  /usr/include/c++/11/tr1/legendre_function.tcc \
+  /usr/include/c++/11/tr1/modified_bessel_func.tcc \
+  /usr/include/c++/11/tr1/poly_hermite.tcc \
+  /usr/include/c++/11/tr1/poly_laguerre.tcc \
+  /usr/include/c++/11/tr1/riemann_zeta.tcc \
   ../poke327.h \
   /usr/include/assert.h \
   /usr/include/c++/11/cstring \
@@ -1059,6 +1085,42 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
   /usr/include/c++/11/bits/istream.tcc \
   ../db_parse.h
 
+
+/usr/include/c++/11/tr1/riemann_zeta.tcc:
+
+/usr/include/c++/11/tr1/poly_laguerre.tcc:
+
+/usr/include/c++/11/tr1/poly_hermite.tcc:
+
+/usr/include/c++/11/tr1/modified_bessel_func.tcc:
+
+/usr/include/c++/11/tr1/hypergeometric.tcc:
+
+/usr/include/c++/11/tr1/exp_integral.tcc:
+
+/usr/include/c++/11/tr1/ell_integral.tcc:
+
+/usr/include/c++/11/tr1/bessel_function.tcc:
+
+/usr/include/c++/11/tr1/special_function_util.h:
+
+/usr/include/c++/11/limits:
+
+/usr/include/c++/11/bits/specfun.h:
+
+/usr/include/x86_64-linux-gnu/bits/iscanonical.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
+
+/usr/include/x86_64-linux-gnu/bits/fp-logb.h:
+
+/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
+
+/usr/include/x86_64-linux-gnu/bits/math-vector.h:
+
+/usr/include/c++/11/math.h:
 
 /usr/include/c++/11/bits/unordered_map.h:
 
@@ -1188,6 +1250,8 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
 
 ../character.cpp:
 
+/usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h:
+
 /usr/include/c++/11/bits/postypes.h:
 
 /usr/include/c++/11/cstdint:
@@ -1206,6 +1270,8 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
 
 /usr/include/c++/11/bits/stl_relops.h:
 
+/usr/include/c++/11/tr1/gamma.tcc:
+
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
 
 /usr/include/x86_64-linux-gnu/sys/stat.h:
@@ -1217,6 +1283,8 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
 /usr/include/x86_64-linux-gnu/sys/select.h:
 
 ../io.h:
+
+/usr/include/c++/11/tr1/legendre_function.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
 
@@ -1306,6 +1374,8 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
 
+/usr/include/math.h:
+
 /usr/include/c++/11/cstring:
 
 /usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
@@ -1325,6 +1395,8 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
 /usr/include/c++/11/bits/alloc_traits.h:
 
 /usr/include/c++/11/pstl/pstl_config.h:
+
+/usr/include/c++/11/cmath:
 
 /usr/include/c++/11/bits/allocator.h:
 
@@ -1373,6 +1445,8 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
 /usr/include/x86_64-linux-gnu/asm/bitsperlong.h:
 
 /usr/include/c++/11/backward/binders.h:
+
+/usr/include/x86_64-linux-gnu/bits/fp-fast.h:
 
 /usr/include/c++/11/bits/node_handle.h:
 
@@ -1427,6 +1501,8 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/atomic_word.h:
+
+/usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h:
 
@@ -1577,6 +1653,8 @@ CMakeFiles/main.dir/pokemon.cpp.o: ../pokemon.cpp \
 /usr/include/c++/11/pstl/execution_defs.h:
 
 /usr/include/c++/11/bits/algorithmfwd.h:
+
+/usr/include/c++/11/tr1/beta_function.tcc:
 
 /usr/include/c++/11/array:
 
